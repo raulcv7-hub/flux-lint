@@ -1,14 +1,14 @@
 use crate::core::config::LintConfig;
 use crate::core::rules::Smell;
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 // Sub-módulos para que sean accesibles desde fuera.
-pub mod rust;
 pub mod python;
+pub mod rust;
 
 /// El contrato que debe cumplir cualquier regla de análisis individual.
-/// T se refiere al tipo de lenguaje si quisiéramos ser estrictos, 
+/// T se refiere al tipo de lenguaje si quisiéramos ser estrictos,
 /// pero tree-sitter usa nodos genéricos, así que simplificamos.
 pub trait Rule: Send + Sync {
     /// Nombre único de la regla (para logs o debugging).

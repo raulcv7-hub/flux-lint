@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct NamingRule;
 
@@ -25,9 +25,9 @@ impl Rule for NamingRule {
             if let Some(pattern) = node.child_by_field_name("pattern") {
                 if pattern.kind() == "identifier" {
                     let name = pattern.utf8_text(source.as_bytes()).unwrap_or("?");
-                    
+
                     if name.len() < 3 && !is_allowed_short_name(name) && !name.starts_with('_') {
-                         smells.push(Smell::new(
+                        smells.push(Smell::new(
                             path.to_path_buf(),
                             node.start_position().row + 1,
                             SmellCategory::Naming,
@@ -38,24 +38,33 @@ impl Rule for NamingRule {
                 }
             }
         }
-        
-        if smells.is_empty() { None } else { Some(smells) }
+
+        if smells.is_empty() {
+            None
+        } else {
+            Some(smells)
+        }
     }
 }
 
 fn is_allowed_short_name(name: &str) -> bool {
-    matches!(name, "i" | "j" | "k" | "x" | "y" | "z" | "id" | "ok" | "tx" | "rx")
+    matches!(
+        name,
+        "i" | "j" | "k" | "x" | "y" | "z" | "id" | "ok" | "tx" | "rx"
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_rust::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_rust::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -67,9 +76,9 @@ mod tests {
         // Para simplificar, buscamos en el árbol
         let mut cursor = tree.walk();
         let root = tree.root_node();
-        
+
         let mut target_node = None;
-        
+
         // Manual find for 'let d = 10;' which is 'let_declaration'
         // root -> function_item -> block -> let_declaration
         let func = root.child(0).unwrap();
@@ -80,10 +89,12 @@ mod tests {
                 break;
             }
         }
-        
+
         let rule = NamingRule;
         let config = LintConfig::default();
-        let smells = rule.check(target_node.unwrap(), code, &PathBuf::from("t.rs"), &config).unwrap();
+        let smells = rule
+            .check(target_node.unwrap(), code, &PathBuf::from("t.rs"), &config)
+            .unwrap();
         assert_eq!(smells[0].rule_id, "short_variable");
     }
 }

@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct PythonHygieneRule;
 
@@ -37,12 +37,14 @@ impl Rule for PythonHygieneRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_python::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_python::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -55,7 +57,9 @@ mod tests {
         let rule = PythonHygieneRule;
         let config = LintConfig::default();
 
-        let smells = rule.check(comment_node, code, &PathBuf::from("test.py"), &config).unwrap();
+        let smells = rule
+            .check(comment_node, code, &PathBuf::from("test.py"), &config)
+            .unwrap();
         assert_eq!(smells[0].rule_id, "todo_comment");
     }
 }

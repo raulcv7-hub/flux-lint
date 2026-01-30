@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct PythonNamingRule;
 
@@ -23,7 +23,7 @@ impl Rule for PythonNamingRule {
             if let Some(left) = node.child_by_field_name("left") {
                 if left.kind() == "identifier" {
                     let name = left.utf8_text(source.as_bytes()).unwrap_or("?");
-                    
+
                     // Ignore typical single-letter loop vars or coordinates
                     if name.len() < 3 && !["i", "j", "k", "x", "y", "z", "_"].contains(&name) {
                         return Some(vec![Smell::new(
@@ -44,12 +44,14 @@ impl Rule for PythonNamingRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_python::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_python::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -57,11 +59,11 @@ mod tests {
     fn test_short_variable_name() {
         let code = "d = 50";
         let tree = parse(code);
-        
+
         // Estructura: module -> expression_statement -> assignment
         let root = tree.root_node();
-        let stmt = root.child(0).unwrap(); 
-        
+        let stmt = root.child(0).unwrap();
+
         // Verificamos si es un wrap (expression_statement) y bajamos un nivel
         let assign_node = if stmt.kind() == "expression_statement" {
             stmt.child(0).unwrap()
@@ -72,8 +74,10 @@ mod tests {
         let rule = PythonNamingRule;
         let config = LintConfig::default();
 
-        let smells = rule.check(assign_node, code, &PathBuf::from("test.py"), &config).expect("Should find a smell");
-        
+        let smells = rule
+            .check(assign_node, code, &PathBuf::from("test.py"), &config)
+            .expect("Should find a smell");
+
         assert_eq!(smells[0].rule_id, "short_variable");
     }
 
@@ -81,7 +85,7 @@ mod tests {
     fn test_allowed_short_name() {
         let code = "i = 0";
         let tree = parse(code);
-        
+
         let root = tree.root_node();
         let stmt = root.child(0).unwrap();
         let assign_node = stmt.child(0).unwrap();

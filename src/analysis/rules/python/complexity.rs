@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct PythonComplexityRule;
 
@@ -62,12 +62,14 @@ impl Rule for PythonComplexityRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_python::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_python::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -86,19 +88,26 @@ def matrix():                  # depth 0 (func)
 "#;
         let tree = parse(code);
         let root = tree.root_node();
-        
+
         // Necesitamos navegar hasta el 'if x' más profundo.
         // Estructura aproximada: func -> body -> for -> body -> if -> body -> while -> body -> try -> body -> if
         // Para el test, podemos recorrer el árbol y buscar donde salte la regla.
-        
+
         let rule = PythonComplexityRule;
         let config = LintConfig::default();
         let path = PathBuf::from("test.py");
-        
+
         let mut found_smell = false;
-        
+
         // Función auxiliar recursiva para simular el walker
-        fn walk(node: Node, rule: &PythonComplexityRule, code: &str, path: &Path, config: &LintConfig, found: &mut bool) {
+        fn walk(
+            node: Node,
+            rule: &PythonComplexityRule,
+            code: &str,
+            path: &Path,
+            config: &LintConfig,
+            found: &mut bool,
+        ) {
             if let Some(_) = rule.check(node, code, path, config) {
                 *found = true;
             }

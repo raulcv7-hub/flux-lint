@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct HygieneRule;
 
@@ -19,10 +19,10 @@ impl Rule for HygieneRule {
         _config: &LintConfig,
     ) -> Option<Vec<Smell>> {
         let kind = node.kind();
-        
+
         if kind == "line_comment" || kind == "block_comment" {
             let text = node.utf8_text(source.as_bytes()).unwrap_or("");
-            
+
             if text.contains("TODO") || text.contains("FIXME") {
                 return Some(vec![Smell::new(
                     path.to_path_buf(),
@@ -40,12 +40,14 @@ impl Rule for HygieneRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_rust::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_rust::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -58,7 +60,9 @@ mod tests {
         let rule = HygieneRule;
         let config = LintConfig::default();
 
-        let smells = rule.check(comment_node, code, &PathBuf::from("t.rs"), &config).unwrap();
+        let smells = rule
+            .check(comment_node, code, &PathBuf::from("t.rs"), &config)
+            .unwrap();
         assert_eq!(smells[0].rule_id, "todo_comment");
     }
 
@@ -71,7 +75,9 @@ mod tests {
         let rule = HygieneRule;
         let config = LintConfig::default();
 
-        let smells = rule.check(comment_node, code, &PathBuf::from("t.rs"), &config).unwrap();
+        let smells = rule
+            .check(comment_node, code, &PathBuf::from("t.rs"), &config)
+            .unwrap();
         assert_eq!(smells[0].rule_id, "todo_comment");
     }
 }

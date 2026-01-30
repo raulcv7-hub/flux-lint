@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct ComplexityRule;
 
@@ -21,7 +21,11 @@ impl Rule for ComplexityRule {
         let kind = node.kind();
         if matches!(
             kind,
-            "if_expression" | "for_expression" | "loop_expression" | "while_expression" | "match_expression"
+            "if_expression"
+                | "for_expression"
+                | "loop_expression"
+                | "while_expression"
+                | "match_expression"
         ) {
             let mut depth = 0;
             let mut ancestor = node.parent();
@@ -62,12 +66,14 @@ impl Rule for ComplexityRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_rust::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_rust::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -94,15 +100,22 @@ mod tests {
         "#;
         let tree = parse(code);
         let root = tree.root_node();
-        
+
         let rule = ComplexityRule;
         let config = LintConfig::default();
         let path = PathBuf::from("test.rs");
-        
+
         let mut found = false;
-        
+
         // Simple walker for test
-        fn walk(node: Node, rule: &ComplexityRule, code: &str, path: &Path, config: &LintConfig, found: &mut bool) {
+        fn walk(
+            node: Node,
+            rule: &ComplexityRule,
+            code: &str,
+            path: &Path,
+            config: &LintConfig,
+            found: &mut bool,
+        ) {
             if let Some(_) = rule.check(node, code, path, config) {
                 *found = true;
             }
@@ -113,6 +126,9 @@ mod tests {
         }
 
         walk(root, &rule, code, &path, &config, &mut found);
-        assert!(found, "Should detect nested loop inside match inside if inside loop");
+        assert!(
+            found,
+            "Should detect nested loop inside match inside if inside loop"
+        );
     }
 }

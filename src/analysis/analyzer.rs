@@ -1,9 +1,9 @@
 use super::languages::AnalysisProvider;
+use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::Smell;
 use std::path::Path;
-use tree_sitter::{Parser, Language, Node};
-use crate::analysis::rules::Rule;
+use tree_sitter::{Language, Node, Parser};
 
 /// Un analizador genérico capaz de procesar cualquier lenguaje soportado por Tree-sitter
 /// siempre que se le suministren las reglas y la gramática correspondientes.

@@ -1,6 +1,6 @@
+pub mod analyzer;
 pub mod engine;
 pub mod languages;
-pub mod analyzer;
 pub mod rules;
 pub mod walker;
 

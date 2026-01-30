@@ -1,7 +1,7 @@
 pub mod bloat;
-pub mod naming;
 pub mod complexity;
 pub mod hygiene;
+pub mod naming;
 
 use crate::analysis::rules::Rule;
 

@@ -1,8 +1,8 @@
 use crate::analysis::rules::Rule;
 use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
-use tree_sitter::Node;
 use std::path::Path;
+use tree_sitter::Node;
 
 pub struct PythonBloatRule;
 
@@ -96,12 +96,14 @@ impl Rule for PythonBloatRule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tree_sitter::Parser;
     use std::path::PathBuf;
+    use tree_sitter::Parser;
 
     fn parse(code: &str) -> tree_sitter::Tree {
         let mut parser = Parser::new();
-        parser.set_language(&tree_sitter_python::LANGUAGE.into()).unwrap();
+        parser
+            .set_language(&tree_sitter_python::LANGUAGE.into())
+            .unwrap();
         parser.parse(code, None).unwrap()
     }
 
@@ -118,12 +120,14 @@ def big_func():
         let tree = parse(code);
         // Buscamos el nodo 'function_definition' (es el primer hijo del root 'module')
         let fn_node = tree.root_node().child(0).unwrap();
-        
+
         let rule = PythonBloatRule;
         let mut config = LintConfig::default();
         config.thresholds.max_function_lines = 3; // Umbral estricto para test
 
-        let smells = rule.check(fn_node, code, &PathBuf::from("test.py"), &config).unwrap();
+        let smells = rule
+            .check(fn_node, code, &PathBuf::from("test.py"), &config)
+            .unwrap();
         assert_eq!(smells.len(), 1);
         assert_eq!(smells[0].rule_id, "long_function");
     }
@@ -139,7 +143,9 @@ def big_func():
         let mut config = LintConfig::default();
         config.thresholds.max_params = 4;
 
-        let smells = rule.check(fn_node, code, &PathBuf::from("test.py"), &config).unwrap();
+        let smells = rule
+            .check(fn_node, code, &PathBuf::from("test.py"), &config)
+            .unwrap();
         assert_eq!(smells.len(), 1);
         assert_eq!(smells[0].rule_id, "too_many_params");
         assert!(smells[0].context.as_ref().unwrap().contains("Params: 5"));
