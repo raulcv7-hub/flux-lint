@@ -1,7 +1,6 @@
 pub mod engine;
 pub mod languages;
-pub mod rust_analyzer;
-pub mod python_analyzer; 
+pub mod analyzer;
 pub mod rules;
 pub mod walker;
 
