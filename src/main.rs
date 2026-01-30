@@ -1,11 +1,11 @@
 use clap::Parser;
 use std::path::Path;
-use tracing::{info, error, Level};
-use tracing_subscriber::FmtSubscriber;
 use std::process::ExitCode;
+use tracing::{error, info, Level};
+use tracing_subscriber::FmtSubscriber;
 
-mod core;
 mod analysis;
+mod core;
 mod reporting;
 
 use core::config::LintConfig;
@@ -40,7 +40,7 @@ fn main() -> ExitCode {
         .with_max_level(log_level)
         .with_writer(std::io::stderr)
         .finish();
-        
+
     if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
         eprintln!("Logger init failed: {}", e);
         return ExitCode::FAILURE;
@@ -65,7 +65,7 @@ fn main() -> ExitCode {
             if !args.json {
                 info!("Found {} files to analyze.", files.len());
             }
-            
+
             let smells = analysis::engine::run_analysis(&files, &config);
             let smell_count = smells.len();
 
@@ -80,7 +80,7 @@ fn main() -> ExitCode {
             if args.fail_on_error && smell_count > 0 {
                 return ExitCode::FAILURE;
             }
-            
+
             ExitCode::SUCCESS
         }
         Err(e) => {

@@ -19,7 +19,7 @@ struct Summary {
 pub fn print_report(smells: &[Smell]) {
     // 1. Calcular Estadísticas
     let mut by_category = HashMap::new();
-    
+
     // Inicializar a 0 para que siempre aparezcan todas las categorías (opcional, pero limpio)
     by_category.insert(SmellCategory::Complexity, 0);
     by_category.insert(SmellCategory::Bloat, 0);
