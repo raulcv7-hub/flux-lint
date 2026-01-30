@@ -1,5 +1,5 @@
 use super::languages::AnalysisProvider;
-use crate::core::config::AuditConfig;
+use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
 use std::path::Path;
 use tree_sitter::{Node, Parser};
@@ -18,7 +18,7 @@ impl RustAnalyzer {
     fn check_bloat(
         &self,
         node: Node,
-        config: &AuditConfig,
+        config: &LintConfig,
         path: &Path,
         source: &str,
         smells: &mut Vec<Smell>,
@@ -80,7 +80,7 @@ impl RustAnalyzer {
     fn check_complexity(
         &self,
         node: Node,
-        _config: &AuditConfig,
+        _config: &LintConfig,
         path: &Path,
         _source: &str,
         smells: &mut Vec<Smell>,
@@ -123,7 +123,7 @@ impl RustAnalyzer {
     fn check_naming(
         &self,
         node: Node,
-        _config: &AuditConfig,
+        _config: &LintConfig,
         path: &Path,
         source: &str,
         smells: &mut Vec<Smell>,
@@ -155,7 +155,7 @@ impl RustAnalyzer {
     fn check_hygiene(
         &self,
         node: Node,
-        _config: &AuditConfig,
+        _config: &LintConfig,
         path: &Path,
         source: &str,
         smells: &mut Vec<Smell>,
@@ -177,7 +177,7 @@ impl RustAnalyzer {
     fn traverse(
         &self,
         node: Node,
-        config: &AuditConfig,
+        config: &LintConfig,
         path: &Path,
         source: &str,
         smells: &mut Vec<Smell>,
@@ -195,7 +195,7 @@ impl RustAnalyzer {
 }
 
 impl AnalysisProvider for RustAnalyzer {
-    fn analyze(&self, path: &Path, code: &str, config: &AuditConfig) -> Vec<Smell> {
+    fn analyze(&self, path: &Path, code: &str, config: &LintConfig) -> Vec<Smell> {
         let mut smells = Vec::new();
         let mut parser = Parser::new();
 
@@ -223,7 +223,7 @@ mod tests {
     fn test_short_naming() {
         let code = "fn main() { let x = 5; let valid = 10; }";
         let analyzer = RustAnalyzer::new();
-        let config = AuditConfig::default();
+        let config = LintConfig::default();
         let smells = analyzer.analyze(&PathBuf::from("test.rs"), code, &config);
 
         assert!(smells.iter().any(|s| s.rule_id == "short_variable"));
@@ -233,7 +233,7 @@ mod tests {
     fn test_todo_detection() {
         let code = "// TODO: Refactor this later";
         let analyzer = RustAnalyzer::new();
-        let config = AuditConfig::default();
+        let config = LintConfig::default();
         let smells = analyzer.analyze(&PathBuf::from("test.rs"), code, &config);
 
         assert!(smells.iter().any(|s| s.rule_id == "todo_comment"));

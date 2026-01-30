@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-/// Global configuration for the Audit tool.
+/// Global configuration for the lint tool.
 /// Defines thresholds and tolerances for the analysis engine.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AuditConfig {
+pub struct LintConfig {
     pub thresholds: Thresholds,
     // Future: exclude_paths, active_rules, etc.
 }
@@ -22,7 +22,7 @@ pub struct Thresholds {
     pub max_dir_files: usize,
 }
 
-impl Default for AuditConfig {
+impl Default for LintConfig {
     fn default() -> Self {
         Self {
             thresholds: Thresholds::default(),
@@ -43,7 +43,7 @@ impl Default for Thresholds {
     }
 }
 
-impl AuditConfig {
+impl LintConfig {
     /// Returns a strict profile for high-reliability systems.
     pub fn strict() -> Self {
         Self {

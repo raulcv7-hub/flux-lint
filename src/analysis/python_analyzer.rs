@@ -1,5 +1,5 @@
 use super::languages::AnalysisProvider;
-use crate::core::config::AuditConfig;
+use crate::core::config::LintConfig;
 use crate::core::rules::{Smell, SmellCategory};
 use std::path::Path;
 use tree_sitter::{Parser, Node};
@@ -16,7 +16,7 @@ impl PythonAnalyzer {
     }
 
     /// Rule: Bloat (Function length, Params)
-    fn check_bloat(&self, node: Node, config: &AuditConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
+    fn check_bloat(&self, node: Node, config: &LintConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
         if node.kind() == "function_definition" {
             // 1. Function Length
             let start = node.start_position().row;
@@ -39,14 +39,11 @@ impl PythonAnalyzer {
 
             // 2. Parameter Count
             if let Some(params_node) = node.child_by_field_name("parameters") {
-                // In Python, parameters include 'self' in methods, which ideally shouldn't count.
-                // We'll count all named children that are identifiers or typed parameters.
                 let mut param_count = 0;
                 let mut cursor = params_node.walk();
                 for child in params_node.children(&mut cursor) {
                     if child.kind() == "identifier" || child.kind() == "typed_parameter" || child.kind() == "default_parameter" {
                         let p_name = self.get_text(child, source);
-                        // Primitive heuristic: ignore 'self' and 'cls'
                         if p_name != "self" && p_name != "cls" {
                             param_count += 1;
                         }
@@ -71,7 +68,7 @@ impl PythonAnalyzer {
     }
 
     /// Rule: Complexity (Deep Nesting)
-    fn check_complexity(&self, node: Node, _config: &AuditConfig, path: &Path, _source: &str, smells: &mut Vec<Smell>) {
+    fn check_complexity(&self, node: Node, _config: &LintConfig, path: &Path, _source: &str, smells: &mut Vec<Smell>) {
         let kind = node.kind();
         // Python logical structures
         if matches!(kind, "if_statement" | "for_statement" | "while_statement" | "try_statement") {
@@ -100,7 +97,7 @@ impl PythonAnalyzer {
     }
 
     /// Rule: Naming (Short Variables)
-    fn check_naming(&self, node: Node, _config: &AuditConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
+    fn check_naming(&self, node: Node, _config: &LintConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
         // x = 1  -> assignment(left: identifier)
         if node.kind() == "assignment" {
             if let Some(left) = node.child_by_field_name("left") {
@@ -122,7 +119,7 @@ impl PythonAnalyzer {
     }
 
     /// Rule: Hygiene (TODOs)
-    fn check_hygiene(&self, node: Node, _config: &AuditConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
+    fn check_hygiene(&self, node: Node, _config: &LintConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
         if node.kind() == "comment" {
             let text = self.get_text(node, source);
             if text.contains("TODO") || text.contains("FIXME") {
@@ -137,7 +134,7 @@ impl PythonAnalyzer {
         }
     }
 
-    fn traverse(&self, node: Node, config: &AuditConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
+    fn traverse(&self, node: Node, config: &LintConfig, path: &Path, source: &str, smells: &mut Vec<Smell>) {
         self.check_bloat(node, config, path, source, smells);
         self.check_complexity(node, config, path, source, smells);
         self.check_naming(node, config, path, source, smells);
@@ -151,7 +148,7 @@ impl PythonAnalyzer {
 }
 
 impl AnalysisProvider for PythonAnalyzer {
-    fn analyze(&self, path: &Path, code: &str, config: &AuditConfig) -> Vec<Smell> {
+    fn analyze(&self, path: &Path, code: &str, config: &LintConfig) -> Vec<Smell> {
         let mut smells = Vec::new();
         let mut parser = Parser::new();
         

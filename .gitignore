@@ -13,7 +13,7 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 
-# Audit Specific
+# lint Specific
 /assets/queries/*.bk
 /reports/
 test_output/

@@ -5,7 +5,7 @@ use comfy_table::{Attribute, Cell, Color, ContentArrangement, Table};
 
 /// Renders the list of smells to stdout.
 pub fn print_report(smells: &[Smell]) {
-    println!("\n{}", "--- AUDIT REPORT ---".bold().underline());
+    println!("\n{}", "--- lint REPORT ---".bold().underline());
 
     if smells.is_empty() {
         println!(

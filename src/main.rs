@@ -2,59 +2,61 @@ use clap::Parser;
 use std::path::Path;
 use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
+use std::process::ExitCode;
 
 mod core;
 mod analysis;
 mod reporting;
 
-use core::config::AuditConfig;
+use core::config::LintConfig;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Target directory to scan
     #[arg(short, long, default_value = ".")]
     path: String,
 
-    /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
     debug: u8,
 
-    /// Enforce strict mode (lower tolerance)
     #[arg(short, long)]
     strict: bool,
 
-    /// Output results in JSON format (ideal for CI/CD)
     #[arg(long)]
     json: bool,
+
+    /// Fail the execution with exit code 1 if smells are found (Critical for CI)
+    #[arg(long)]
+    fail_on_error: bool,
 }
 
-fn main() -> anyhow::Result<()> {
-    // 1. Initialize Logger
+// Cambiamos el retorno a ExitCode
+fn main() -> ExitCode {
     let args = Args::parse();
 
+    // 1. Logger Setup
     let log_level = if args.json { Level::WARN } else { Level::INFO };
-    
     let subscriber = FmtSubscriber::builder()
         .with_max_level(log_level)
         .with_writer(std::io::stderr)
         .finish();
         
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
+    if let Err(e) = tracing::subscriber::set_global_default(subscriber) {
+        eprintln!("Logger init failed: {}", e);
+        return ExitCode::FAILURE;
+    }
 
     let target_path = Path::new(&args.path);
 
     // 2. Load Config
     let config = if args.strict {
-        AuditConfig::strict()
+        LintConfig::strict()
     } else {
-        AuditConfig::default()
+        LintConfig::default()
     };
 
     if !args.json {
-        info!("Starting Audit on: {}", args.path);
-        info!("Scanning filesystem...");
+        info!("Starting lint on: {}", args.path);
     }
 
     // 3. Execution
@@ -65,19 +67,25 @@ fn main() -> anyhow::Result<()> {
             }
             
             let smells = analysis::engine::run_analysis(&files, &config);
+            let smell_count = smells.len();
 
-            // 4. Reporting Strategy
+            // 4. Reporting
             if args.json {
                 reporting::json::print_report(&smells);
             } else {
                 reporting::console::print_report(&smells);
             }
+
+            // 5. Exit Strategy
+            if args.fail_on_error && smell_count > 0 {
+                return ExitCode::FAILURE;
+            }
+            
+            ExitCode::SUCCESS
         }
         Err(e) => {
             error!("Failed to walk directory: {}", e);
-            std::process::exit(1);
+            ExitCode::FAILURE
         }
     }
-
-    Ok(())
 }

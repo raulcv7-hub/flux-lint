@@ -14,7 +14,7 @@
 
 ## 1. NIVEL SISTEMA: Topología Física (The Shape)
 
-| Topología | Selección | Justificación para Audit |
+| Topología | Selección | Justificación para lint |
 | :--- | :--- | :--- |
 | **Monolito Modular** | **[X]** | Es un binario único (`.exe`/bin). No tiene sentido distribuir microservicios para una herramienta de terminal. La modularidad será interna (Crates/Modules), no física. |
 | **Microservicios** | `[ ]` | Añadiría latencia de red innecesaria. |
@@ -25,7 +25,7 @@
 
 ### 2.1. Propiedad del Dato
 
-* **In-Memory Read-Only:** Audit no posee los datos (el código fuente), solo los lee prestados del disco.
+* **In-Memory Read-Only:** lint no posee los datos (el código fuente), solo los lee prestados del disco.
 * **Transient State:** El estado (AST, Métricas) vive solo durante la ejecución del proceso.
 
 ### 2.2. Consistencia

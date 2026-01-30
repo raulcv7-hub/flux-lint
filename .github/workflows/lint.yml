@@ -1,0 +1,33 @@
+name: lint Code Quality
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint-check:
+    name: lint Self-Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Dependencies
+        uses: swatinem/rust-cache@v2
+
+      - name: Build lint (Release)
+        run: cargo build --release --verbose
+
+      - name: Run lint (Console Mode)
+        run: ./target/release/lint --path . --strict
+
+      - name: Run lint (CI Gatekeeper)
+        run: ./target/release/lint --path . --strict --json --fail-on-error

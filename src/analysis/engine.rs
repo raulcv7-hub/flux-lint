@@ -1,5 +1,5 @@
 use super::languages::get_analyzer;
-use crate::core::config::AuditConfig;
+use crate::core::config::LintConfig;
 use crate::core::rules::Smell;
 use rayon::prelude::*;
 use std::fs;
@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use tracing::{debug, warn};
 
 /// Orchestrates the analysis process in parallel.
-pub fn run_analysis(files: &[PathBuf], config: &AuditConfig) -> Vec<Smell> {
+pub fn run_analysis(files: &[PathBuf], config: &LintConfig) -> Vec<Smell> {
     files
         .par_iter()
         .flat_map(|path| {
