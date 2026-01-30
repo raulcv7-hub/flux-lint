@@ -3,7 +3,7 @@ use std::fmt;
 use std::path::PathBuf;
 
 /// Categorías de olores de código alineadas con los requisitos.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum SmellCategory {
     Complexity, // Salud Mental (Bucles anidados, ceguera booleana)
     Bloat,      // Obesidad (Métodos largos, archivos gigantes)

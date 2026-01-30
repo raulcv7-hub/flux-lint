@@ -1,3 +1,2 @@
 pub mod console;
-
-pub use console::print_report;
+pub mod json;
