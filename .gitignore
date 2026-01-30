@@ -1,2 +1,22 @@
-/target
+# Rust / Cargo
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Audit Specific
+/assets/queries/*.bk
+/reports/
+test_output/
+
+# Otros
 /docs/INFO.md
