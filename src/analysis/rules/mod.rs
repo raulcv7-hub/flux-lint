@@ -5,6 +5,7 @@ use std::path::Path;
 
 // Sub-módulos para que sean accesibles desde fuera.
 pub mod rust;
+pub mod python;
 
 /// El contrato que debe cumplir cualquier regla de análisis individual.
 /// T se refiere al tipo de lenguaje si quisiéramos ser estrictos, 
