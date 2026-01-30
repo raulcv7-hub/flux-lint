@@ -1,5 +1,7 @@
 pub mod bloat;
 pub mod naming;
+pub mod complexity;
+pub mod hygiene;
 
 use crate::analysis::rules::Rule;
 
@@ -8,6 +10,7 @@ pub fn get_rules() -> Vec<Box<dyn Rule>> {
     vec![
         Box::new(bloat::BloatRule),
         Box::new(naming::NamingRule),
-        // Aquí añadiremos Complexity, Hygiene, etc.
+        Box::new(complexity::ComplexityRule),
+        Box::new(hygiene::HygieneRule),
     ]
 }
