@@ -12,6 +12,7 @@ pub trait AnalysisProvider: Send + Sync {
 pub fn get_analyzer(extension: &str) -> Option<Box<dyn AnalysisProvider>> {
     match extension {
         "rs" => Some(Box::new(super::rust_analyzer::RustAnalyzer::new())),
+        "py" => Some(Box::new(super::python_analyzer::PythonAnalyzer::new())),
         _ => None,
     }
 }
