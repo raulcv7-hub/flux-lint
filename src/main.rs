@@ -1,11 +1,11 @@
 use clap::Parser;
 use std::path::Path;
-use tracing::{info, error, Level};
+use tracing::{error, info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 // Import modules
-mod core;
 mod analysis;
+mod core;
 mod reporting;
 
 use core::config::AuditConfig;
@@ -32,8 +32,7 @@ fn main() -> anyhow::Result<()> {
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     // 2. Parse Arguments
     let args = Args::parse();
@@ -54,7 +53,7 @@ fn main() -> anyhow::Result<()> {
     match analysis::walk_directory(target_path) {
         Ok(files) => {
             info!("Found {} files to analyze.", files.len());
-            
+
             // 5. Analysis
             let smells = analysis::engine::run_analysis(&files, &config);
 

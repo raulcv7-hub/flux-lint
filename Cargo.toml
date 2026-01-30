@@ -7,20 +7,20 @@ description = "Analizador micro de proyectos: smells y podredumbre estructural"
 
 [dependencies]
 # CLI & Configuration
-clap = { version = "4.4", features = ["derive", "env"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+clap = { version = "4.5.56", features = ["derive", "env"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
 toml = "0.9.8"
 
 # Logging & Error Handling
-tracing = "0.1"
-tracing-subscriber = "0.3"
-anyhow = "1.0"
+tracing = "0.1.44"
+tracing-subscriber = "0.3.22"
+anyhow = "1.0.100"
 thiserror = "2.0.18"
 
 # Parallelism & File System
-rayon = "1.8"
-ignore = "0.4"
+rayon = "1.11.0"
+ignore = "0.4.25"
 
 # Parsing Core
 tree-sitter = "0.26.3"
@@ -29,7 +29,7 @@ tree-sitter-python = "0.25.0"
 
 # UX / Terminal
 colored = "3.1.1"
-comfy-table = "7.1"
+comfy-table = "7.2.2"
 
 [dev-dependencies]
-pretty_assertions = "1.4"
+pretty_assertions = "1.4.1"

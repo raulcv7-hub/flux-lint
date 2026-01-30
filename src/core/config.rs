@@ -34,11 +34,11 @@ impl Default for Thresholds {
     /// Provides standard, sane defaults for a strict but fair analysis.
     fn default() -> Self {
         Self {
-            max_complexity: 10,      // Sonar default is often 15, we aim for 10.
-            max_function_lines: 40,  // Fits on a standard monitor.
-            max_params: 4,           // More than 4 is usually a Data Clump.
-            max_file_lines: 300,     // Single Responsibility Principle limit.
-            max_dir_files: 20,       // Prevents "God Packages".
+            max_complexity: 10,     // Sonar default is often 15, we aim for 10.
+            max_function_lines: 40, // Fits on a standard monitor.
+            max_params: 4,          // More than 4 is usually a Data Clump.
+            max_file_lines: 300,    // Single Responsibility Principle limit.
+            max_dir_files: 20,      // Prevents "God Packages".
         }
     }
 }
