@@ -17,46 +17,47 @@ const SUPPORTED_EXTENSIONS: &[&str] = &[
 ];
 
 /// Scans a directory recursively and returns a list of relevant files.
-///
-/// Features:
-/// - Respects `.gitignore` and `.ignore` files.
-/// - Skips hidden files/directories (like `.git/`).
-/// - Filters by supported source code extensions.
 pub fn walk_directory(path: &Path) -> Result<Vec<PathBuf>> {
     let mut files = Vec::new();
 
     // Configure the walker
     let walker = WalkBuilder::new(path)
-        .standard_filters(true) // Enables .gitignore, .ignore, global ignores, etc.
-        .hidden(true) // Skip hidden files
-        .follow_links(false) // Security: Don't follow symlinks to avoid cycles/external paths
+        .standard_filters(true) 
+        .hidden(true) 
+        .follow_links(false) 
         .build();
 
     for result in walker {
         match result {
             Ok(entry) => {
-                let path = entry.path();
-
-                // 1. Must be a file (not a directory or symlink pointing to nowhere)
-                if !path.is_file() {
-                    continue;
-                }
-
-                // 2. Check Extension
-                if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
-                    let ext_lower = ext.to_lowercase();
-                    if SUPPORTED_EXTENSIONS.contains(&ext_lower.as_str()) {
-                        debug!("Collected file: {:?}", path);
-                        files.push(path.to_path_buf());
-                    }
+                if is_supported_source_file(entry.path()) {
+                    debug!("Collected file: {:?}", entry.path());
+                    files.push(entry.path().to_path_buf());
                 }
             }
             Err(err) => {
-                // Log permission errors or IO errors but do not crash the pipeline
                 warn!("Skipping entry due to error: {}", err);
             }
         }
     }
 
     Ok(files)
+}
+
+/// Helper puro para validar si un archivo debe ser analizado.
+/// Extraído para reducir la complejidad ciclomática y longitud de walk_directory.
+fn is_supported_source_file(path: &Path) -> bool {
+    // 1. Must be a file
+    if !path.is_file() {
+        return false;
+    }
+
+    // 2. Check Extension
+    path.extension()
+        .and_then(|s| s.to_str())
+        .map(|ext| {
+            let ext_lower = ext.to_lowercase();
+            SUPPORTED_EXTENSIONS.contains(&ext_lower.as_str())
+        })
+        .unwrap_or(false)
 }
