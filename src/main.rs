@@ -1,8 +1,16 @@
 use clap::Parser;
-use tracing::{info, Level};
+use std::path::Path;
+use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
 
-/// High-performance static analysis tool for code quality.
+// Import modules
+mod core;
+mod analysis;
+mod reporting;
+
+use core::config::AuditConfig;
+
+/// Audit: High-performance static analysis tool for code quality.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -13,6 +21,10 @@ struct Args {
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
     debug: u8,
+
+    /// Enforce strict mode
+    #[arg(short, long)]
+    strict: bool,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -25,15 +37,35 @@ fn main() -> anyhow::Result<()> {
 
     // 2. Parse Arguments
     let args = Args::parse();
+    let target_path = Path::new(&args.path);
 
-    info!("Starting Audit...");
-    info!("Target directory: {}", args.path);
-    
-    // TODO: Initialize Engine
-    // TODO: Run Scan
-    // TODO: Report Results
+    // 3. Load Configuration
+    let config = if args.strict {
+        info!("Strict mode enabled.");
+        AuditConfig::strict()
+    } else {
+        AuditConfig::default()
+    };
 
-    println!("Audit initialized successfully. Ready for implementation.");
-    
+    info!("Starting Audit on: {}", args.path);
+
+    // 4. File Walking
+    info!("Scanning filesystem...");
+    match analysis::walk_directory(target_path) {
+        Ok(files) => {
+            info!("Found {} files to analyze.", files.len());
+            
+            // 5. Analysis
+            let smells = analysis::engine::run_analysis(&files, &config);
+
+            // 6. Reporting
+            reporting::print_report(&smells);
+        }
+        Err(e) => {
+            error!("Failed to walk directory: {}", e);
+            std::process::exit(1);
+        }
+    }
+
     Ok(())
 }
