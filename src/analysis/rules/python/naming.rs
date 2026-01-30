@@ -55,27 +55,41 @@ mod tests {
 
     #[test]
     fn test_short_variable_name() {
-        let code = "d = 50"; // 'd' es malo
+        let code = "d = 50";
         let tree = parse(code);
-        let assign_node = tree.root_node().child(0).unwrap(); // assignment
+        
+        // Estructura: module -> expression_statement -> assignment
+        let root = tree.root_node();
+        let stmt = root.child(0).unwrap(); 
+        
+        // Verificamos si es un wrap (expression_statement) y bajamos un nivel
+        let assign_node = if stmt.kind() == "expression_statement" {
+            stmt.child(0).unwrap()
+        } else {
+            stmt
+        };
 
         let rule = PythonNamingRule;
         let config = LintConfig::default();
 
-        let smells = rule.check(assign_node, code, &PathBuf::from("test.py"), &config).unwrap();
+        let smells = rule.check(assign_node, code, &PathBuf::from("test.py"), &config).expect("Should find a smell");
+        
         assert_eq!(smells[0].rule_id, "short_variable");
     }
 
     #[test]
     fn test_allowed_short_name() {
-        let code = "i = 0"; // 'i' es permitido
+        let code = "i = 0";
         let tree = parse(code);
-        let assign_node = tree.root_node().child(0).unwrap();
+        
+        let root = tree.root_node();
+        let stmt = root.child(0).unwrap();
+        let assign_node = stmt.child(0).unwrap();
 
         let rule = PythonNamingRule;
         let config = LintConfig::default();
 
         let res = rule.check(assign_node, code, &PathBuf::from("test.py"), &config);
-        assert!(res.is_none());
+        assert!(res.is_none(), "Variable 'i' should be allowed");
     }
 }
